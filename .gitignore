@@ -1,0 +1,111 @@
+# Build directories
+build/
+BitNet/build/
+cmake-build-*/
+BitNet/cmake-build-*/
+
+# Binary files
+*.exe
+*.dll
+*.so
+*.dylib
+*.a
+*.lib
+*.o
+*.obj
+
+# Model files (large binary files)
+*.gguf
+*.bin
+*.pth
+*.pt
+*.safetensors
+*.ckpt
+*.h5
+*.pb
+*.onnx
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.egg-info/
+dist/
+*.egg
+.Python
+pip-log.txt
+pip-delete-this-directory.txt
+.venv/
+venv/
+ENV/
+env/
+bitnet-env/
+
+# Logs
+*.log
+logs/
+*.out
+*.err
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Node.js (if any)
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.cache
+tmp/
+temp/
+
+# Test coverage
+htmlcov/
+.coverage
+.coverage.*
+coverage.xml
+*.cover
+
+# Documentation builds
+docs/_build/
+docs/_generated/
+
+# Chat logs and user data
+chat_logs/
+
+# CMake
+CMakeCache.txt
+CMakeFiles/
+cmake_install.cmake
+Makefile
+CTestTestfile.cmake
+_deps/
+
+# Local configuration
+.env
+.env.local
+*.local
+
+# Generated files
+BitNet/3rdparty/llama.cpp/build/
+BitNet/spm-headers/
+BitNet/spm-sources/
+
+# Large directories we might want to exclude
+BitNet/3rdparty/llama.cpp/.git/
+BitNet/3rdparty/llama.cpp/tests/
+BitNet/3rdparty/llama.cpp/models/
+
+# Server logs
+bitnet-server*.log
+mock-server.log
