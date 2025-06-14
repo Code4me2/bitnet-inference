@@ -1,0 +1,41 @@
+version: '3.8'
+
+services:
+  bitnet:
+    build: .
+    image: bitnet-inference:latest
+    container_name: bitnet-server
+    ports:
+      - "8081:8081"
+    volumes:
+      # Mount local models directory
+      - ./models:/models:ro
+      # Optional: Mount custom model
+      # - /path/to/your/model.gguf:/models/ggml-model-i2_s.gguf:ro
+    environment:
+      - OMP_NUM_THREADS=4  # Adjust based on your CPU
+      - MODEL_PATH=/models/ggml-model-i2_s.gguf
+    restart: unless-stopped
+    deploy:
+      resources:
+        limits:
+          cpus: '4'  # Adjust based on your system
+          memory: 4G
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/health"]
+      interval: 30s
+      timeout: 3s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Include a simple web UI for testing
+  bitnet-ui:
+    image: nginx:alpine
+    container_name: bitnet-ui
+    ports:
+      - "8082:80"
+    volumes:
+      - ./web-ui:/usr/share/nginx/html:ro
+    depends_on:
+      - bitnet
+    restart: unless-stopped

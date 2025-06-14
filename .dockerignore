@@ -1,0 +1,40 @@
+# Git files
+.git
+.gitignore
+.gitmodules
+
+# Documentation
+*.md
+docs/
+
+# Models (will be mounted as volume)
+models/
+*.gguf
+*.bin
+
+# Build artifacts
+build/
+BitNet/build/
+
+# Python
+__pycache__/
+*.pyc
+bitnet-env/
+venv/
+
+# Logs
+*.log
+logs/
+
+# IDE
+.vscode/
+.idea/
+
+# Temporary files
+*.tmp
+*.swp
+
+# Docker files (don't need to copy these into image)
+Dockerfile
+docker-compose.yml
+.dockerignore

@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BitNet Inference Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        .container {
+            background-color: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #333;
+            text-align: center;
+        }
+        .status {
+            padding: 10px;
+            margin: 20px 0;
+            border-radius: 5px;
+            text-align: center;
+        }
+        .status.online {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        .status.offline {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+            resize: vertical;
+        }
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            font-size: 16px;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        button:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+        }
+        #response {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .spinner {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .settings {
+            margin: 20px 0;
+            padding: 15px;
+            background-color: #f8f9fa;
+            border-radius: 5px;
+        }
+        .setting-group {
+            margin: 10px 0;
+        }
+        label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        input[type="number"], input[type="text"] {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>BitNet Inference Test</h1>
+        
+        <div id="status" class="status offline">Checking server status...</div>
+        
+        <div class="settings">
+            <h3>Settings</h3>
+            <div class="setting-group">
+                <label for="serverUrl">Server URL:</label>
+                <input type="text" id="serverUrl" value="http://localhost:8081" style="width: 300px;">
+            </div>
+            <div class="setting-group">
+                <label for="temperature">Temperature:</label>
+                <input type="number" id="temperature" value="0.7" min="0" max="2" step="0.1">
+            </div>
+            <div class="setting-group">
+                <label for="maxTokens">Max Tokens:</label>
+                <input type="number" id="maxTokens" value="100" min="1" max="2048">
+            </div>
+        </div>
+        
+        <h3>Test Prompt</h3>
+        <textarea id="prompt" rows="4" placeholder="Enter your prompt here...">What is artificial intelligence?</textarea>
+        
+        <button id="sendBtn" onclick="sendRequest()">Send Request</button>
+        
+        <div class="spinner">
+            <p>⏳ Generating response...</p>
+        </div>
+        
+        <div id="response"></div>
+    </div>
+
+    <script>
+        // Check server status on load
+        window.onload = function() {
+            checkServerStatus();
+            // Check every 30 seconds
+            setInterval(checkServerStatus, 30000);
+        };
+
+        async function checkServerStatus() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const statusDiv = document.getElementById('status');
+            
+            try {
+                const response = await fetch(`${serverUrl}/health`);
+                if (response.ok) {
+                    statusDiv.className = 'status online';
+                    statusDiv.textContent = '✅ Server is online';
+                    document.getElementById('sendBtn').disabled = false;
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                statusDiv.className = 'status offline';
+                statusDiv.textContent = '❌ Server is offline';
+                document.getElementById('sendBtn').disabled = true;
+            }
+        }
+
+        async function sendRequest() {
+            const serverUrl = document.getElementById('serverUrl').value;
+            const prompt = document.getElementById('prompt').value;
+            const temperature = parseFloat(document.getElementById('temperature').value);
+            const maxTokens = parseInt(document.getElementById('maxTokens').value);
+            
+            if (!prompt.trim()) {
+                alert('Please enter a prompt');
+                return;
+            }
+
+            const sendBtn = document.getElementById('sendBtn');
+            const spinner = document.querySelector('.spinner');
+            const responseDiv = document.getElementById('response');
+            
+            sendBtn.disabled = true;
+            spinner.style.display = 'block';
+            responseDiv.textContent = '';
+
+            try {
+                const response = await fetch(`${serverUrl}/completion`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        prompt: prompt,
+                        temperature: temperature,
+                        n_predict: maxTokens,
+                        stream: false
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                responseDiv.textContent = data.content || 'No response content';
+                
+            } catch (error) {
+                responseDiv.textContent = `Error: ${error.message}`;
+                responseDiv.style.color = 'red';
+            } finally {
+                sendBtn.disabled = false;
+                spinner.style.display = 'none';
+            }
+        }
+
+        // Allow Enter key to send request
+        document.getElementById('prompt').addEventListener('keydown', function(e) {
+            if (e.ctrlKey && e.key === 'Enter') {
+                sendRequest();
+            }
+        });
+    </script>
+</body>
+</html>
