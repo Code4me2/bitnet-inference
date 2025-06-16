@@ -1,66 +1,74 @@
-# BitNet Inference Server
+# BitNet.cpp Inference Server
 
-Easy-to-deploy BitNet inference server with Docker support for running 1-bit LLMs efficiently on CPU.
+High-performance inference server for 1-bit LLMs using Microsoft's official BitNet.cpp framework. Achieves 2-6x speedup and 55-82% energy reduction compared to standard implementations.
 
-## 🚀 Quick Start (Docker)
+## 🚀 Quick Start
 
-The easiest way to get started is using Docker:
-
+### Option 1: Run Locally (Recommended)
 ```bash
-# Clone the repository
+# Clone repository
 git clone https://github.com/Code4me2/bitnet-inference.git
 cd bitnet-inference
 
-# Download the model (one-time setup)
-mkdir -p models
-wget -O models/ggml-model-i2_s.gguf \
-  https://huggingface.co/microsoft/BitNet-b1.58-2B-4T/resolve/main/ggml-model-i2_s.gguf
+# Run the server using pre-built binary
+./run_local.sh
 
-# Start the server
-docker-compose up -d
-
-# Check if it's running
-curl http://localhost:8081/health
+# Test inference
+curl -X POST http://localhost:8081/completion \
+  -H "Content-Type: application/json" \
+  -d '{"prompt": "What is BitNet?", "n_predict": 50}'
 ```
 
-## 📦 What's Included
+### Option 2: Docker (Experimental)
+```bash
+# Note: Docker support is currently being improved
+# For now, we recommend running locally with ./run_local.sh
+```
 
-- **BitNet Server**: High-performance inference server for 1-bit LLMs
-- **Docker Configuration**: Pre-configured for easy deployment
-- **Model Support**: BitNet b1.58 2B model (2.4B parameters)
-- **N8N Integration**: Ready for workflow automation
+### Model Setup
+If you don't have the model file yet:
+```bash
+# Download model manually
+mkdir -p models
+wget -O models/ggml-model-i2_s.gguf \
+  https://huggingface.co/microsoft/BitNet-b1.58-2B-4T-gguf/resolve/main/ggml-model-i2_s.gguf
+```
 
-## 🔧 Configuration
+## 🎯 Performance Optimization
 
-### Environment Variables
+The server automatically detects your hardware and optimizes:
 
-- `OMP_NUM_THREADS`: Number of CPU threads (default: 4)
-- `MODEL_PATH`: Path to the GGUF model file (default: `/models/ggml-model-i2_s.gguf`)
+- **Kernel Selection**: I2_S (high-performance), TL1 (balanced), TL2 (memory-efficient)
+- **Thread Configuration**: Auto-scales based on CPU cores and kernel type
+- **CPU Affinity**: Dedicated core assignment for optimal performance
+- **Memory Management**: Adaptive batch sizes and context windows
 
-### Ports
+### Manual Configuration
 
-- `8081`: BitNet inference server
-- `8082`: Optional web UI (if enabled)
+Override auto-detection with environment variables:
 
-## 🐳 Docker Commands
+```yaml
+environment:
+  - BITNET_KERNEL=i2_s          # i2_s, tl1, tl2
+  - OMP_NUM_THREADS=8           # Number of threads
+  - CPU_AFFINITY=0-7            # CPU core assignment
+  - USE_CASE=high_performance   # balanced, memory_efficient
+```
+
+## 📊 Benchmarking and Analysis
 
 ```bash
-# Build the image
-docker-compose build
+# Run performance benchmark
+./scripts/benchmark.sh
 
-# Start services
-docker-compose up -d
+# Analyze BitNet usage and energy efficiency
+./scripts/analyze_bitnet.sh
 
-# View logs
-docker-compose logs -f bitnet
+# Monitor energy usage
+python3 ./scripts/monitor_energy.py
 
-# Stop services
-docker-compose down
-
-# Update and rebuild
-git pull
-docker-compose build --no-cache
-docker-compose up -d
+# View auto-configuration logs (when using Docker)
+docker logs bitnet-server | grep -E "(Auto-selected|Auto-configured)"
 ```
 
 ## 🔌 API Usage
@@ -97,47 +105,56 @@ curl -X POST http://localhost:8081/chat/completions \
 
 ## 🤝 N8N Integration
 
-This server is designed to work with the [N8N BitNet custom node](https://github.com/Code4me2/data-compose). 
+Connect from N8N workflows:
+- Docker network: `http://bitnet:8081`
+- Host network: `http://localhost:8081`
 
-To connect from N8N:
-- If N8N is in Docker: Use `http://bitnet:8081` (same network) or `http://host.docker.internal:8081`
-- If N8N is on host: Use `http://localhost:8081`
+Compatible with the [N8N BitNet custom node](https://github.com/Code4me2/data-compose).
 
-## 📊 Performance Tuning
+## 🛠️ Docker Support
 
-For optimal performance:
+**Note**: Docker build is currently experimental due to BitNet.cpp's complex build process. For production use, we recommend running locally with `./run_local.sh`.
 
-1. **CPU Threads**: Set `OMP_NUM_THREADS` to match your CPU cores
-2. **Memory**: Allocate at least 4GB RAM for the 2B model
-3. **CPU Affinity**: Use `taskset` for dedicated CPU cores:
-   ```bash
-   docker-compose exec bitnet taskset -c 0-3 llama-server ...
-   ```
-
-## 🛠️ Building from Source
-
-If you prefer to build from source:
-
+If you want to experiment with Docker:
 ```bash
-# Clone with submodules
-git clone --recursive https://github.com/Code4me2/bitnet-inference.git
-cd bitnet-inference
+# Build the image (this may take a while)
+docker-compose build
 
-# Follow BitNet build instructions
-cd BitNet
-pip install -r requirements.txt
-python setup_env.py -md models/BitNet-b1.58-2B-4T -q i2_s
+# Start services
+docker-compose up -d
 
-# Run the server
-./build/bin/llama-server -m models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf \
-  --host 0.0.0.0 --port 8081
+# View logs
+docker-compose logs -f bitnet
+
+# Stop services
+docker-compose down
 ```
+
+## 📈 Performance Expectations
+
+After migration to optimized BitNet.cpp:
+- **Speed**: 2-6x faster inference
+- **Energy**: 55-82% reduction in power consumption
+- **Memory**: Better utilization with optimized kernels
+- **Throughput**: Higher tokens/second
+
+## 🔧 Advanced Configuration
+
+### Kernel Types
+- **I2_S**: Best for high-performance systems (8+ cores, 16GB+ RAM)
+- **TL1**: Balanced performance for mid-range systems
+- **TL2**: Memory-efficient for constrained environments
+
+### Use Cases
+- **high_performance**: Maximum speed, higher resource usage
+- **balanced**: Default, good performance vs resource balance
+- **memory_efficient**: Minimal memory usage, slower performance
 
 ## 📚 Documentation
 
 - [BitNet Official Repository](https://github.com/microsoft/BitNet)
 - [Model on Hugging Face](https://huggingface.co/microsoft/BitNet-b1.58-2B-4T)
-- [N8N Integration Guide](./BITNET_N8N_OPTIMIZATION_PLAN.md)
+- [Migration Guide](./docs/MIGRATION_GUIDE.md)
 
 ## 🔒 Security Notes
 

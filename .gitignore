@@ -90,6 +90,8 @@ cmake_install.cmake
 Makefile
 CTestTestfile.cmake
 _deps/
+cmake-local/
+BitNet/cmake-local/
 
 # Local configuration
 .env
@@ -100,6 +102,10 @@ _deps/
 BitNet/3rdparty/llama.cpp/build/
 BitNet/spm-headers/
 BitNet/spm-sources/
+BitNet/best_kernel_config.json
+BitNet/include/kernel_config.ini
+best_kernel_config.json
+include/kernel_config.ini
 
 # Large directories we might want to exclude
 BitNet/3rdparty/llama.cpp/.git/
@@ -109,3 +115,11 @@ BitNet/3rdparty/llama.cpp/models/
 # Server logs
 bitnet-server*.log
 mock-server.log
+BitNet/bitnet-server*.log
+BitNet/logs/
+
+# Dockerignore files
+.dockerignore.local
+
+# Old/backup files
+setup.sh
