@@ -18,6 +18,8 @@ BitNet/cmake-build-*/
 *.gguf
 *.bin
 *.pth
+*.safetensors
+*.model
 *.pt
 *.safetensors
 *.ckpt
@@ -46,6 +48,8 @@ bitnet-env/
 logs/
 *.out
 *.err
+server_*.log
+monitoring.log
 
 # IDE files
 .vscode/
@@ -68,6 +72,7 @@ yarn-error.log*
 *.cache
 tmp/
 temp/
+.cache/
 
 # Test coverage
 htmlcov/
@@ -117,9 +122,16 @@ bitnet-server*.log
 mock-server.log
 BitNet/bitnet-server*.log
 BitNet/logs/
+server.log
+server_restart.log
+monitoring.log
 
 # Dockerignore files
 .dockerignore.local
 
 # Old/backup files
 setup.sh
+
+# Deleted documentation files (to be removed)
+DOCKER_STATUS.md
+docs/MIGRATION_GUIDE.md

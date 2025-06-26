@@ -1,0 +1,27 @@
+# BitNet Inference Python Requirements
+
+# Core dependencies
+transformers>=4.30.0
+torch>=2.0.0
+numpy>=1.24.0
+gguf>=0.6.0
+
+# Build dependencies
+cffi>=1.15.0
+typing-extensions>=4.5.0
+
+# Development dependencies
+pytest>=7.0.0
+flake8>=6.0.0
+black>=23.0.0
+isort>=5.12.0
+
+# Benchmarking and analysis
+matplotlib>=3.6.0
+pandas>=2.0.0
+psutil>=5.9.0
+
+# Optional dependencies for specific features
+# Uncomment if needed:
+# accelerate>=0.20.0  # For multi-GPU support
+# bitsandbytes>=0.41.0  # For additional quantization methods

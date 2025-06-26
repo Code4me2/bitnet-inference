@@ -1,36 +1,43 @@
 # BitNet.cpp Inference Server
 
-High-performance inference server for 1-bit LLMs using Microsoft's official BitNet.cpp framework. Achieves 2-6x speedup and 55-82% energy reduction compared to standard implementations.
+High-performance inference server for 1-bit LLMs using Microsoft's official BitNet.cpp framework. Achieves significant performance improvements with optimized kernels.
 
 ## 🚀 Quick Start
 
-### Option 1: Run Locally (Recommended)
+### Working Method: Local Build and Run
 ```bash
 # Clone repository
 git clone https://github.com/Code4me2/bitnet-inference.git
-cd bitnet-inference
+cd bitnet-inference/BitNet
 
-# Run the server using pre-built binary
-./run_local.sh
+# Download model (one-time setup)
+python3 setup_env.py -md models/BitNet-b1.58-2B-4T -q i2_s
 
-# Test inference
+# Start the server
+./build/bin/llama-server -m models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf \
+  --host 0.0.0.0 --port 8081
+
+# In another terminal, test inference
 curl -X POST http://localhost:8081/completion \
   -H "Content-Type: application/json" \
   -d '{"prompt": "What is BitNet?", "n_predict": 50}'
 ```
 
-### Option 2: Docker (Experimental)
+### Docker Status
+⚠️ **Note**: The Docker build is currently not working due to BitNet's architecture-specific compilation requirements. Use the local build method above.
+
+### Interactive Chat
 ```bash
-# Note: Docker support is currently being improved
-# For now, we recommend running locally with ./run_local.sh
+# After starting the server, use the chat interface
+cd BitNet && ./bitnet-chat.sh
 ```
 
-### Model Setup
-If you don't have the model file yet:
+### Alternative: Manual Model Download
+If `setup_env.py` fails to download the model:
 ```bash
-# Download model manually
-mkdir -p models
-wget -O models/ggml-model-i2_s.gguf \
+cd BitNet
+mkdir -p models/BitNet-b1.58-2B-4T
+wget -O models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf \
   https://huggingface.co/microsoft/BitNet-b1.58-2B-4T-gguf/resolve/main/ggml-model-i2_s.gguf
 ```
 
@@ -58,17 +65,17 @@ environment:
 ## 📊 Benchmarking and Analysis
 
 ```bash
-# Run performance benchmark
+# Test token generation speed
+node test-token-speed.js
+
+# Monitor server health and resource usage
+./monitor_server.sh
+
+# Run comprehensive benchmark
 ./scripts/benchmark.sh
 
-# Analyze BitNet usage and energy efficiency
-./scripts/analyze_bitnet.sh
-
-# Monitor energy usage
-python3 ./scripts/monitor_energy.py
-
-# View auto-configuration logs (when using Docker)
-docker logs bitnet-server | grep -E "(Auto-selected|Auto-configured)"
+# Run kernel tuning for optimal performance (from BitNet directory)
+cd BitNet && python3 utils/kernel_tuning.py
 ```
 
 ## 🔌 API Usage
@@ -111,32 +118,36 @@ Connect from N8N workflows:
 
 Compatible with the [N8N BitNet custom node](https://github.com/Code4me2/data-compose).
 
-## 🛠️ Docker Support
+## 🛠️ Prerequisites
 
-**Note**: Docker build is currently experimental due to BitNet.cpp's complex build process. For production use, we recommend running locally with `./run_local.sh`.
+- Python 3.8+
+- GCC/Clang compiler
+- CMake 3.14+
+- ~4GB RAM for the 2B model
+- ~20GB disk space for model and build files
 
-If you want to experiment with Docker:
-```bash
-# Build the image (this may take a while)
-docker-compose build
+## 📁 Project Structure
 
-# Start services
-docker-compose up -d
-
-# View logs
-docker-compose logs -f bitnet
-
-# Stop services
-docker-compose down
+```
+bitnet-inference/
+├── BitNet/              # Core BitNet implementation (submodule)
+│   ├── build/bin/       # Compiled binaries (after setup)
+│   ├── models/          # Model files (after download)
+│   ├── docs/            # Comprehensive documentation
+│   └── setup_env.py     # Main setup script
+├── scripts/             # Helper scripts
+├── .github/             # GitHub workflows and configs
+└── test-token-speed.js  # Token speed testing utility
 ```
 
 ## 📈 Performance Expectations
 
-After migration to optimized BitNet.cpp:
-- **Speed**: 2-6x faster inference
-- **Energy**: 55-82% reduction in power consumption
-- **Memory**: Better utilization with optimized kernels
-- **Throughput**: Higher tokens/second
+Optimized BitNet.cpp performance:
+- **ARM**: 1.37x - 5.07x speedup vs llama.cpp
+- **x86**: 2.37x - 6.17x speedup vs llama.cpp
+- **Energy**: Significant reduction in power consumption
+- **Memory**: Efficient 1-bit quantization reduces memory usage
+- **Throughput**: Higher tokens/second with optimized kernels
 
 ## 🔧 Advanced Configuration
 
@@ -154,7 +165,10 @@ After migration to optimized BitNet.cpp:
 
 - [BitNet Official Repository](https://github.com/microsoft/BitNet)
 - [Model on Hugging Face](https://huggingface.co/microsoft/BitNet-b1.58-2B-4T)
-- [Migration Guide](./docs/MIGRATION_GUIDE.md)
+- [Installation Guide](./BitNet/docs/getting-started/installation.md)
+- [Setup Guide](./BitNet/docs/getting-started/setup-guide.md)
+- [Debugging Guide](./BitNet/docs/development/debugging.md)
+- [Performance Optimization](./BitNet/docs/performance/optimization.md)
 
 ## 🔒 Security Notes
 
