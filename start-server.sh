@@ -19,6 +19,13 @@ if [ ! -f "build/bin/llama-server" ]; then
     exit 1
 fi
 
+# Check if server is already running
+if pgrep -f "llama-server.*--port 8081" > /dev/null; then
+    echo "Warning: BitNet server is already running on port 8081"
+    echo "Use ./stop-server.sh to stop it first, or ./restart-server.sh to restart"
+    exit 1
+fi
+
 # Start server with verified working parameters
 echo "Starting BitNet server on port 8081..."
 ./build/bin/llama-server \
