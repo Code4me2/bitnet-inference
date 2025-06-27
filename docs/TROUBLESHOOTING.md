@@ -33,7 +33,7 @@ lsof -i :8081
 ```
 
 #### Server crashes immediately
-- Check available memory: `free -h` (need ~4GB)
+- Check available memory: `free -h` (need 2-4GB)
 - Try reducing context size:
   ```bash
   ./build/bin/llama-server -m models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf \

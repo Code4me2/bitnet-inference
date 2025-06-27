@@ -51,7 +51,7 @@ cd BitNet && ./bitnet-chat.sh
 ## 💡 System Requirements
 
 - Python 3.8+, GCC/Clang, CMake 3.14+
-- ~4GB RAM, ~20GB disk space
+- 2-4GB RAM, ~2GB disk space
 - Linux/macOS (Windows via WSL2)
 
 ## 🚀 Performance
