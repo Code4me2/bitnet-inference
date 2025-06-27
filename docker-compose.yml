@@ -1,5 +1,9 @@
 version: '3.8'
 
+# WARNING: The Docker build is currently not functional due to BitNet's
+# architecture-specific compilation requirements. Please use the local
+# build method instead. See docs/DOCKER_STATUS.md for details.
+
 services:
   bitnet:
     build: .
@@ -11,7 +15,7 @@ services:
       - ./models:/models
     environment:
       # Basic Configuration
-      - MODEL_PATH=/models/ggml-model-i2_s.gguf
+      - MODEL_PATH=/models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf
       - HOST=0.0.0.0
       - PORT=8081
       

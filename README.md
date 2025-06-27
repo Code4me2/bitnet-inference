@@ -13,14 +13,26 @@ cd bitnet-inference/BitNet
 # Download model (one-time setup)
 python3 setup_env.py -md models/BitNet-b1.58-2B-4T -q i2_s
 
-# Start the server
+# Start the server (verified working)
 ./build/bin/llama-server -m models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf \
   --host 0.0.0.0 --port 8081
 
-# In another terminal, test inference
-curl -X POST http://localhost:8081/completion \
+# You should see: "main: HTTP server is listening, hostname: 0.0.0.0, port: 8081"
+
+# In another terminal, test the server
+curl http://localhost:8081/health
+# Expected: {"status":"ok"}
+
+# Test inference
+curl -X POST http://localhost:8081/chat/completions \
   -H "Content-Type: application/json" \
-  -d '{"prompt": "What is BitNet?", "n_predict": 50}'
+  -d '{"messages": [{"role": "user", "content": "Hello!"}], "max_tokens": 50}'
+```
+
+### Quick Start Script
+```bash
+# Use the provided startup script
+./start-server.sh
 ```
 
 ### Docker Status

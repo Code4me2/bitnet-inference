@@ -20,8 +20,8 @@ async function testTokenSpeed(prompt, maxTokens = 100) {
 
   const options = {
     hostname: 'localhost',
-    port: 11434,
-    path: '/v1/chat/completions',
+    port: 8081,
+    path: '/chat/completions',
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
