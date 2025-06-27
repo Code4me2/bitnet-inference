@@ -27,6 +27,19 @@ find . -name "__pycache__" -type d -exec rm -rf {} \; 2>/dev/null
 find . -name "*.pyc" -type f -exec rm -f {} \; 2>/dev/null
 echo "  ✓ Removed Python cache"
 
+# Check for duplicate model in root directory
+if [ -f "./models/ggml-model-i2_s.gguf" ] && [ -f "./BitNet/models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf" ]; then
+    echo "Checking for duplicate model file..."
+    MD5_ROOT=$(md5sum "./models/ggml-model-i2_s.gguf" 2>/dev/null | cut -d' ' -f1)
+    MD5_BITNET=$(md5sum "./BitNet/models/BitNet-b1.58-2B-4T/ggml-model-i2_s.gguf" | cut -d' ' -f1)
+    if [ "$MD5_ROOT" = "$MD5_BITNET" ]; then
+        echo "  Found duplicate model file in ./models/"
+        rm -f "./models/ggml-model-i2_s.gguf"
+        rmdir "./models" 2>/dev/null  # Remove directory if empty
+        echo "  ✓ Removed 1.2GB duplicate model"
+    fi
+fi
+
 # Optional: Remove build artifacts (commented out by default)
 # echo "Remove build artifacts? This will require rebuilding. (y/N)"
 # read -r response
